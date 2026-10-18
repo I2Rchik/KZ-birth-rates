@@ -1,0 +1,25 @@
+{
+  "series": {
+    "births":       {"type": "count", "required": true,  "label": "Live births"},
+    "marriages":    {"type": "count", "required": true,  "label": "Registered marriages"},
+    "population":   {"type": "stock", "required": true,  "label": "Population at start of period"},
+    "wage":         {"type": "rate",  "required": false, "label": "Average nominal monthly wage, tenge"},
+    "cpi":          {"type": "index", "required": false, "base": "previous_period", "label": "Consumer price index"},
+    "unemployment": {"type": "rate",  "required": false, "label": "Unemployment rate, %"},
+    "housing":      {"type": "count", "required": false, "label": "Residential floor space commissioned, m2"}
+  },
+  "model": {
+    "seed": 20261018,
+    "holdout_share": 0.2,
+    "drivers": [
+      {"name": "m", "lag": 3, "label": "Marriage rate (yoy log change)", "expected_sign": "+"},
+      {"name": "w", "lag": 4, "label": "Real wage (yoy log change)", "expected_sign": "+"},
+      {"name": "u", "lag": 4, "label": "Unemployment rate (yoy change, pp)", "expected_sign": "-"},
+      {"name": "h", "lag": 4, "label": "Housing commissioned per 1,000 (yoy log change)", "expected_sign": "+"}
+    ],
+    "own_lags": [1, 4],
+    "breaks": ["2015Q3", "2020Q2", "2022Q3"],
+    "covid_window": ["2020Q2", "2021Q4"],
+    "replication_tolerance_per_1000": 0.01
+  }
+}

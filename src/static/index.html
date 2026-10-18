@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Kazakhstan Regional Birth Rate</title>
+<style>
+  :root { --ink:#1b2430; --muted:#5d6b7a; --line:#d9dee4; --bg:#f6f7f9; --card:#fff;
+          --accent:#1f5f8b; --band:#1f5f8b22; --band2:#1f5f8b12; --up:#2f7d4f; --down:#b0413e; --warn:#8a5a00; }
+  * { box-sizing:border-box; }
+  body { margin:0; font:15px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif; color:var(--ink); background:var(--bg); }
+  header { display:flex; flex-wrap:wrap; gap:12px; align-items:center; justify-content:space-between;
+           padding:12px 20px; background:var(--card); border-bottom:1px solid var(--line); }
+  h1 { font-size:17px; margin:0; }
+  select, input[type=range] { font:inherit; }
+  select { padding:6px 8px; border:1px solid var(--line); border-radius:6px; background:#fff; }
+  main { max-width:1100px; margin:0 auto; padding:16px 20px 40px; display:grid; gap:14px;
+         grid-template-columns: 1fr 1fr; }
+  .card { background:var(--card); border:1px solid var(--line); border-radius:10px; padding:14px 16px; }
+  .wide { grid-column:1 / -1; }
+  h2 { font-size:13px; text-transform:uppercase; letter-spacing:.04em; color:var(--muted); margin:0 0 8px; }
+  .chip { display:inline-block; font-size:12px; padding:3px 8px; border-radius:999px; border:1px solid var(--line); color:var(--muted); }
+  .chip.off { color:var(--warn); border-color:#e6c98a; background:#fff8e8; }
+  .banner { grid-column:1/-1; padding:10px 14px; border-radius:8px; font-weight:600; }
+  .banner.err { background:#fdecec; color:var(--down); border:1px solid #f1c4c3; }
+  .banner.test { background:var(--down); color:#fff; }
+  .banner.warn { background:#fff8e8; color:var(--warn); border:1px solid #e6c98a; font-weight:500; }
+  .headline { display:grid; grid-template-columns: repeat(auto-fit,minmax(220px,1fr)); gap:16px; align-items:end; }
+  .big { font-size:40px; font-weight:700; line-height:1.05; }
+  .unit { color:var(--muted); font-size:13px; }
+  .delta.up { color:var(--up); } .delta.down { color:var(--down); }
+  table { border-collapse:collapse; width:100%; font-size:13px; }
+  td, th { text-align:left; padding:5px 6px; border-bottom:1px solid var(--line); vertical-align:top; }
+  th { color:var(--muted); font-weight:600; }
+  .num { text-align:right; font-variant-numeric:tabular-nums; }
+  .bar { height:12px; border-radius:3px; }
+  .muted { color:var(--muted); font-size:13px; }
+  .signal { font-weight:600; padding:8px 10px; border-radius:6px; background:var(--bg); margin-top:8px; }
+  svg text { font-family:inherit; }
+  @media (max-width:760px){ main { grid-template-columns:1fr; } .big{font-size:34px;} }
+</style>
+</head>
+<body>
+<header>
+  <h1>Kazakhstan regional birth rate &mdash; now and next quarter</h1>
+  <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+    <label for="region" class="muted">Region</label>
+    <select id="region"></select>
+    <span id="dataChip" class="chip">Loading&hellip;</span>
+  </div>
+</header>
+<main id="main">
+  <div id="banners" class="wide" style="display:grid;gap:8px"></div>
+
+  <section class="card wide" id="headlineCard">
+    <h2>Headline</h2>
+    <div class="headline" id="headline"><span class="muted">Loading&hellip;</span></div>
+  </section>
+
+  <section class="card wide">
+    <h2>History and forecast</h2>
+    <div id="chart"></div>
+  </section>
+
+  <section class="card">
+    <h2>What drives the next-quarter forecast</h2>
+    <div id="drivers"></div>
+  </section>
+
+  <section class="card">
+    <h2>Scenario</h2>
+    <div id="scenario"></div>
+  </section>
+
+  <section class="card">
+    <h2>Can the forecast be trusted?</h2>
+    <div id="evidence"></div>
+  </section>
+
+  <section class="card">
+    <h2>Provenance</h2>
+    <div id="provenance"></div>
+  </section>
+
+  <section class="card wide">
+    <h2>What this indicator cannot tell you</h2>
+    <p style="margin:0">It counts births by the quarter they were registered, not when babies were conceived, so registration delays can move births between quarters. It is a crude rate: a region with many women aged 20&ndash;34 shows a high rate even when families there have no more children than elsewhere, so do not read it as fertility per woman. The latest four quarters are operational figures that the Bureau revises, and units such as &ldquo;East Kazakhstan&rdquo; include the regions split off in 2018 and 2022 (Abai, Zhetisu, Ulytau, Shymkent).</p>
+  </section>
+</main>
+<script src="/app.js"></script>
+</body>
+</html>

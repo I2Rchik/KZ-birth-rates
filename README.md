@@ -94,3 +94,11 @@ None. The statistical tests in `src/econometrics.py` are written from the formul
 - Monte Carlo p-values use seed 20261018 (`src/config.json`).
 - Library versions are pinned in `requirements.txt`. Tested on Python 3.13.
 - Replication tolerance: every regional and national forecast within ±0.01 births per 1,000 (`python run.py check`).
+
+## Published snapshot (GitHub Pages)
+
+```bash
+python run.py export-site   # writes site/ from data/processed and model/artifact.json
+```
+
+`site/` is a static copy of the website: the same page, reading a saved copy of the model's output. It is for showing the results online. The graded product is still the local site started with `python run.py`. `.github/workflows/pages.yml` publishes `site/` on every push to `main`. One-time setup on GitHub: Settings → Pages → Source: **GitHub Actions**. Re-run `export-site` and commit after every `rebuild`, so the online copy matches the model.

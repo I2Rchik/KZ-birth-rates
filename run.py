@@ -5,6 +5,7 @@
   python run.py check           rebuild, then verify the headline numbers reproduce within tolerance
   python run.py test            run the automated tests
   python run.py ingest | model  run one layer only
+  python run.py export-site     write site/: a static snapshot for GitHub Pages
   python run.py register-raw FILE --series births --url URL --id SERIES_ID [--publisher NAME]
                                 copy a downloaded file into data/raw and record it in the manifest
 """
@@ -86,6 +87,30 @@ def cmd_check(args):
     print(f"CHECK PASSED: all headline forecasts reproduce within ±{tol} births per 1,000.")
 
 
+def cmd_export_site(args):
+    """Write site/: a static snapshot of the website for GitHub Pages.
+    It shows exactly what the local site shows, read from the same
+    data/processed and model/artifact.json; nothing is estimated."""
+    import app
+    st = app.state()
+    if not st["ok"]:
+        sys.exit("Cannot export: " + " ".join(e["message"] for e in st["errors"]))
+    st["source"] = {"checked": True, "reachable": None, "static": True}
+    out = os.path.join(ROOT, "site")
+    os.makedirs(out, exist_ok=True)
+    static = os.path.join(ROOT, "src", "static")
+    with open(os.path.join(static, "index.html"), encoding="utf-8") as f:
+        html = f.read().replace('<script src="app.js"></script>',
+                                '<script>window.STATIC_SITE = true;</script>\n<script src="app.js"></script>')
+    with open(os.path.join(out, "index.html"), "w", encoding="utf-8") as f:
+        f.write(html)
+    shutil.copy2(os.path.join(static, "app.js"), os.path.join(out, "app.js"))
+    with open(os.path.join(out, "state.json"), "w", encoding="utf-8") as f:
+        json.dump(st, f, ensure_ascii=False, separators=(",", ":"))
+    open(os.path.join(out, ".nojekyll"), "w").close()
+    print("site/ written: open site/index.html through any static web server, or publish it with GitHub Pages.")
+
+
 def cmd_test(args):
     import unittest
     suite = unittest.defaultTestLoader.discover(os.path.join(ROOT, "tests"), top_level_dir=ROOT)
@@ -123,7 +148,7 @@ def cmd_register(args):
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("command", nargs="?", default="serve",
-                    choices=["serve", "ingest", "model", "rebuild", "check", "test", "register-raw"])
+                    choices=["serve", "ingest", "model", "rebuild", "check", "test", "register-raw", "export-site"])
     ap.add_argument("file", nargs="?")
     ap.add_argument("--port", type=int, default=int(os.environ.get("PORT", "8050")))
     ap.add_argument("--no-browser", action="store_true")
@@ -138,7 +163,8 @@ def main():
     if args.command == "register-raw" and not (args.file and args.series):
         ap.error("register-raw needs FILE and --series")
     {"serve": cmd_serve, "ingest": cmd_ingest, "model": cmd_model, "rebuild": cmd_rebuild,
-     "check": cmd_check, "test": cmd_test, "register-raw": cmd_register}[args.command](args)
+     "check": cmd_check, "test": cmd_test, "register-raw": cmd_register,
+     "export-site": cmd_export_site}[args.command](args)
 
 
 if __name__ == "__main__":

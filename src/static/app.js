@@ -5,6 +5,8 @@
 "use strict";
 const Z90 = 1.6449;
 let S = null;
+// The exported GitHub Pages snapshot sets window.STATIC_SITE and ships state.json
+const STATE_URL = window.STATIC_SITE ? "state.json" : "/api/state";
 
 const $ = (id) => document.getElementById(id);
 const fmt = (v, d = 1) => (v === null || v === undefined || Number.isNaN(v)) ? "n/a" : v.toFixed(d);
@@ -13,7 +15,7 @@ const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&l
 async function load() {
   let res;
   try {
-    res = await fetch("/api/state", { cache: "no-store" });
+    res = await fetch(STATE_URL, { cache: "no-store" });
     S = await res.json();
   } catch (e) {
     $("banners").innerHTML = `<div class="banner err">The local server is not responding. Restart it with: python run.py</div>`;
@@ -26,12 +28,12 @@ async function load() {
       .map(([c, n]) => `<option value="${c}">${esc(n)}</option>`).join("");
   sel.onchange = render;
   render();
-  if (S.source && !S.source.checked) setTimeout(refreshSource, 3500);
+  if (S.source && !S.source.checked && !window.STATIC_SITE) setTimeout(refreshSource, 3500);
 }
 
 async function refreshSource() {
   try {
-    const r = await (await fetch("/api/state", { cache: "no-store" })).json();
+    const r = await (await fetch(STATE_URL, { cache: "no-store" })).json();
     S.source = r.source;
     chip();
   } catch (e) { /* server stopped: the banner on next load says so */ }
@@ -46,6 +48,11 @@ function retrievedDate() {
 function chip() {
   const c = $("dataChip");
   const r = S.source || {};
+  if (window.STATIC_SITE) {
+    c.className = "chip";
+    c.textContent = `Published snapshot · data retrieved ${retrievedDate()}`;
+    return;
+  }
   if (r.checked && r.reachable === false) {
     c.className = "chip off";
     c.textContent = `Offline: stat.gov.kz unreachable. Showing cached data retrieved ${retrievedDate()}`;

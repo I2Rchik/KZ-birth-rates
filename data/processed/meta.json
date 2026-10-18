@@ -49,7 +49,7 @@
       "publisher": "Bureau of National Statistics of the Republic of Kazakhstan",
       "retrieved": "2026-10-18",
       "revised": "yes: operational monthly data are revised when annual data are final",
-      "series": "marriages",
+      "series": "marriages_annual",
       "synthetic": null,
       "url": "https://taldau.stat.gov.kz/ru",
       "used_as": null
@@ -60,7 +60,7 @@
       "publisher": "Bureau of National Statistics of the Republic of Kazakhstan",
       "retrieved": "2026-10-18",
       "revised": "yes: operational monthly data are revised when annual data are final",
-      "series": "income",
+      "series": "income_annual",
       "synthetic": null,
       "url": "https://taldau.stat.gov.kz/ru",
       "used_as": null
@@ -85,6 +85,28 @@
       "series": "cpi",
       "synthetic": null,
       "url": "https://taldau.stat.gov.kz/ru",
+      "used_as": null
+    },
+    {
+      "file": "marriages_quarterly_cumulative.csv.gz",
+      "identifier": "Number of registered marriages (Число зарегистрированных браков), persons; Total; January–quarter end, cumulative (English export)",
+      "publisher": "Bureau of National Statistics of the Republic of Kazakhstan",
+      "retrieved": "2026-10-18",
+      "revised": "yes: operational monthly data are revised when annual data are final",
+      "series": "marriages",
+      "synthetic": null,
+      "url": "https://taldau.stat.gov.kz",
+      "used_as": null
+    },
+    {
+      "file": "income_per_capita_quarterly.csv.gz",
+      "identifier": "Average per capita nominal monetary income of the population (Среднедушевые номинальные денежные доходы), tenge; quarterly (English export)",
+      "publisher": "Bureau of National Statistics of the Republic of Kazakhstan",
+      "retrieved": "2026-10-18",
+      "revised": "yes: operational monthly data are revised when annual data are final",
+      "series": "income",
+      "synthetic": null,
+      "url": "https://taldau.stat.gov.kz",
       "used_as": null
     }
   ],

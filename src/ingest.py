@@ -94,10 +94,16 @@ def _rows(names, periods, values, top_only):
 def read_taldau_long(text):
     """Taldau data.csv: one row per (indicator, period, region, settlement type)."""
     d = pd.read_csv(io.StringIO(text), sep="\t", dtype=str)
-    kato = [c for c in d.columns if c.startswith("КАТО")][0]
-    sptm = [c for c in d.columns if c.startswith("СПТМ")]
-    if sptm:
-        d = d[d[sptm[0]] == "Всего"]  # total, not urban/rural split
+    # region column: Russian (КАТО), Kazakh (ӘАОЖ) or English export; 4th column otherwise
+    kato = next((c for c in d.columns if c.startswith(("КАТО", "ӘАОЖ", "KATO"))), d.columns[3])
+    # any breakdown column (urban/rural, sex, ...) is reduced to its total row
+    for c in d.columns[5:-1]:
+        if c.startswith(("L", "Л")):
+            continue
+        vals = set(d[c].dropna())
+        tot = vals & {"Всего", "Total", "Барлығы", "Барлыгы"}
+        if tot:
+            d = d[d[c] == tot.pop()]
     return _rows(d[kato], [parse_period(x) for x in d["DAT"]], d["VAL"], top_only=True)
 
 
@@ -421,20 +427,39 @@ def build(raw_dir=None, out_dir=None):
     annual_pop = pop_code.assign(year=pop_code.t // 4).groupby(["code", "year"])["population"].agg(["mean", "count"])
     annual_pop = annual_pop[annual_pop["count"] == 4]["mean"].rename("pop_avg").reset_index()
     drivers = []
-    if "marriages" in raw:
-        mr = harmonise_counts(raw["marriages"])
-        mr = mr[mr.kind == "A"][["code", "year", "value"]].rename(columns={"value": "marriages"})
-        mr = mr.merge(annual_pop, on=["code", "year"], how="inner").sort_values(["code", "year"])
-        mr["marriage_rate"] = 1000 * mr["marriages"] / mr["pop_avg"]
-        mr["m"] = log_yoy(mr["marriage_rate"], mr["code"], k=1)
-        drivers.append(annual_to_publication_quarters(mr, "m"))
-        drivers.append(annual_to_publication_quarters(mr, "marriage_rate"))
-    if "income" in raw and annual_cpi is not None:
-        inc = harmonise_weighted(raw["income"][raw["income"].kind == "A"], weights_annual)
-        inc = inc[["code", "year", "value"]].rename(columns={"value": "income"})
-        inc = inc.merge(annual_cpi[["code", "year", "cpi_avg"]], on=["code", "year"], how="inner").sort_values(["code", "year"])
-        inc["w"] = log_yoy(inc["income"], inc["code"], k=1) - log_yoy(inc["cpi_avg"], inc["code"], k=1)
-        drivers.append(annual_to_publication_quarters(inc, "w"))
+    quarterly_kinds = ["CUM", "Q", "M"]
+
+    # marriages: quarterly series (pre-registered) if downloaded, else annual
+    mq = raw.get("marriages")
+    if mq is not None and mq.kind.isin(quarterly_kinds).any():
+        m = cumulative_to_period(harmonise_counts(mq[mq.kind.isin(quarterly_kinds)]))
+        mq_q = to_quarterly(m, "sum")[["code", "t", "value"]].rename(columns={"value": "marriages"})
+        panel = panel.merge(mq_q, on=["code", "t"], how="left")
+    else:
+        ma = raw.get("marriages_annual", mq)
+        if ma is not None:
+            mr = harmonise_counts(ma)
+            mr = mr[mr.kind == "A"][["code", "year", "value"]].rename(columns={"value": "marriages"})
+            mr = mr.merge(annual_pop, on=["code", "year"], how="inner").sort_values(["code", "year"])
+            mr["marriage_rate"] = 1000 * mr["marriages"] / mr["pop_avg"]
+            mr["m"] = log_yoy(mr["marriage_rate"], mr["code"], k=1)
+            drivers.append(annual_to_publication_quarters(mr, "m"))
+            drivers.append(annual_to_publication_quarters(mr, "marriage_rate"))
+
+    # income: quarterly per-capita income deflated by the quarterly CPI, else annual
+    iq = raw.get("income")
+    if iq is not None and iq.kind.isin(["Q", "M"]).any() and "cpi" in panel:
+        inc = harmonise_weighted(iq[iq.kind.isin(["Q", "M"])], weights)
+        inc_q = to_quarterly(inc, "mean")[["code", "t", "value"]].rename(columns={"value": "income"})
+        panel = panel.merge(inc_q, on=["code", "t"], how="left")
+    else:
+        ia = raw.get("income_annual", iq)
+        if ia is not None and annual_cpi is not None:
+            inc = harmonise_weighted(ia[ia.kind == "A"], weights_annual)
+            inc = inc[["code", "year", "value"]].rename(columns={"value": "income"})
+            inc = inc.merge(annual_cpi[["code", "year", "cpi_avg"]], on=["code", "year"], how="inner").sort_values(["code", "year"])
+            inc["w"] = log_yoy(inc["income"], inc["code"], k=1) - log_yoy(inc["cpi_avg"], inc["code"], k=1)
+            drivers.append(annual_to_publication_quarters(inc, "w"))
     if "housing_pc" in raw:
         hp = harmonise_weighted(raw["housing_pc"][raw["housing_pc"].kind == "A"], weights_annual)
         hp = hp[["code", "year", "value"]].rename(columns={"value": "housing_pc"}).sort_values(["code", "year"])
@@ -459,6 +484,11 @@ def build(raw_dir=None, out_dir=None):
     panel["cbr"] = annualised_rate(panel["births"], panel["population"])
     panel["y"] = log_yoy(panel["cbr"], by)
     panel["y_births"] = log_yoy(panel["births"], by)
+    if "marriages" in panel and "m" not in panel:
+        panel["marriage_rate"] = annualised_rate(panel["marriages"], panel["population"])
+        panel["m"] = log_yoy(panel["marriage_rate"], by)
+    if "income" in panel and "cpi" in panel and "w" not in panel:
+        panel["w"] = log_yoy(panel["income"], by) - log_yoy(panel["cpi"], by)
     if "unemployment" in panel:
         panel["u"] = diff_yoy(panel["unemployment"], by)
     # keep from the first quarter with any births up to one quarter past the last
@@ -466,7 +496,7 @@ def build(raw_dir=None, out_dir=None):
     panel["pop_extrapolated"] = panel["pop_extrapolated"].fillna(False).astype(bool)
 
     os.makedirs(out_dir, exist_ok=True)
-    cols = ["code", "quarter", "t", "births", "population", "pop_extrapolated", "cbr", "marriage_rate", "cpi",
+    cols = ["code", "quarter", "t", "births", "population", "pop_extrapolated", "cbr", "marriages", "marriage_rate", "income", "cpi",
             "unemployment", "y", "y_births", "m", "w", "u", "h"]
     cols = [c for c in cols if c in panel.columns]
     panel[cols].to_csv(os.path.join(out_dir, "panel.csv"), index=False, float_format="%.10g", lineterminator="\n")

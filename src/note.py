@@ -77,6 +77,8 @@ def build(model_dir=None, outputs=None, processed=None):
     with open(os.path.join(processed, "meta.json"), encoding="utf-8") as fh:
         meta = json.load(fh)
     sp, b, d = a["specification"], a["benchmark"], a["diagnostics"]
+    with open(os.path.join(ROOT, "src", "config.json"), encoding="utf-8") as fh:
+        cfg_model = json.load(fh)["model"]
     names = sp["regressors"]
     nat = a["national"]
     fals = a["falsification"]
@@ -166,8 +168,15 @@ def build(model_dir=None, outputs=None, processed=None):
              f"{'not ' if (dm.get('pvalue') or 1) >= 0.05 else ''}significant at 5%. "
              f"Falsification rule 1 (beat the benchmark): {'passed' if fals['rule_1_beats_benchmark']['passed'] else 'FAILED'}. "
              f"Rule 2 (marriage effect &gt; 0 at 5%, one-sided): {'passed' if r2.get('passed') else 'FAILED'} (one-sided p {p(r2.get('p_one_sided'))}).</p>")
-    H.append("<p><b>Economic size.</b> The drivers are statistically real but small. A one-standard-deviation rise in real income moves the rate by "
-             f"{f(econ.get('w_l1', {}).get('effect_per_1000'), 2)} per 1,000, and in marriages by {f(econ.get(m_key, {}).get('effect_per_1000'), 2)}. The 2025–26 fall was several births per 1,000. Most of the forecast comes from momentum, not from the drivers.</p>")
+    w_key = next((n for n in names if n.startswith("w_")), None)
+    m_eff = econ.get(m_key, {}).get("effect_per_1000")
+    H.append("<p><b>Economic size.</b> A one-standard-deviation move in real income changes the rate by "
+             f"{f(econ.get(w_key, {}).get('effect_per_1000'), 2)} births per 1,000, and in marriages by {f(m_eff, 2)}. "
+             "The 2025–26 fall was several births per 1,000, so these are small against what they would need to explain. Most of the forecast comes from momentum, not from the drivers.</p>")
+    if r2 and not r2.get("passed") and m_key:
+        H.append(f"<p><b>The core mechanism is rejected.</b> The pre-registered marriage effect has the wrong sign ({f(a['coefficients'][m_key], 3)}, p {p(a['p_values'][m_key])}), so falsification rule 2 fails. "
+                 f"Dropping 2020Q2–2021Q4 leaves it negative but no longer significant (Annex B). The sign is therefore driven largely by the pandemic, when marriages fell in 2020 and births rose in 2021. "
+                 "We report this as the result and do not swap in a specification that passes.</p>")
     H.append("<p><b>New element.</b> This is the first one-quarter-ahead forecast of the birth rate for Kazakhstan's regions on a harmonised 16-region quarterly panel. Published regional work is annual and descriptive (Aubakirova et al., 2024).</p>")
     H.append("<p><b>Deviations from pre-registration</b> (memo of 18 October 2026, in <code>docs/pre_registration.md</code>):</p><ul>" +
              "".join(f"<li>{esc(x['what'])}. Why: {esc(x['why'])}. Pre-registered specification: {esc(x['pre_registered_result'])}.</li>" for x in deviations) +
@@ -181,12 +190,16 @@ def build(model_dir=None, outputs=None, processed=None):
              "The January 2023 population revision shifts the denominator by about 2–3% in some regions.</p>")
     H.append("<p><b>Internal.</b> There is no identification strategy, so the coefficients are labelled conditional correlations, not effects. "
              "Omitted variables: family-benefit and mortgage programmes raise income, housing and births together, which biases those coefficients upward. "
-             "Reverse causality: an expected birth can bring a marriage forward. Dating annual drivers at publication reduces this but does not remove it. "
+             "Pandemic shocks moved marriages and births in opposite directions, which biases the marriage coefficient downward. "
+             "Reverse causality: an expected birth can bring a marriage forward. The 3-quarter lag reduces this but does not remove it. "
              "Measurement error: revisions to the latest data and the projected denominator bias coefficients toward zero. "
              "Residual serial correlation with a lagged dependent variable leaves a small bias in the momentum terms.</p>")
     H.append("<p><b>External.</b> The sample covers 2016–2026: a floating tenge after 2015, COVID-19 in 2020–21, the 2022 border changes, and oil-price swings in a commodity exporter. "
              "The Chow tests show the relationship shifted at each of these dates. Results apply to Kazakhstan's high-fertility, oil-dependent regime and do not transfer to low-fertility economies.</p>")
-    H.append(f"<p><b>Statistical.</b> {sp['specifications_run']} specifications were run, all declared in advance, and every one is reported. "
+    prior = cfg_model.get("prior_runs", [])
+    n_prior = sum(r["specs"] for r in prior)
+    prior_txt = " ".join(f"An earlier run ({esc(r['date'])}, {r['specs']} specifications): {esc(r['what'])}; {esc(r['result'])}; {esc(r['status'])}." for r in prior)
+    H.append(f"<p><b>Statistical.</b> {sp['specifications_run'] + n_prior} specifications were run in total, all declared in advance, and every one is reported. {prior_txt} "
              f"With {sp['n_obs']} region-quarters the pooled tests have reasonable power. A single region has only {sp['n_quarters']} quarters, so no region-level effects are claimed. "
              "Failing to reject an effect (housing) is not evidence that it is absent.</p>")
     H.append(table(["Robustness check", "Marriage coef.", "p", "RMSE ratio", "Winner"], rob_rows))

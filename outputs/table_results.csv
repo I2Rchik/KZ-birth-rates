@@ -1,6 +1,6 @@
 regressor,label,expected_sign,coef,se_dk,t,p
-y_l1,Own momentum (lag 1),,0.6223,0.0833,7.4745,0.0000
-y_l4,Own momentum (lag 4),,-0.1345,0.0889,-1.5124,0.1399
-m_l1,"Marriage rate, last published year (yoy log change), lag 1",+,0.0956,0.0524,1.8248,0.0771
-w_l1,"Real per-capita income, last published year (yoy log change), lag 1",+,0.2291,0.0734,3.1233,0.0037
-h_l1,"Housing per resident, last published year (yoy log change), lag 1",+,-0.2533,0.2337,-1.0837,0.2864
+y_l1,Own momentum (lag 1),,0.6388,0.0861,7.4165,0.0000
+y_l4,Own momentum (lag 4),,-0.1020,0.0769,-1.3266,0.1950
+m_l3,"Marriage rate (yoy log change), lag 3",+,-0.0414,0.0155,-2.6764,0.0121
+w_l4,"Real per-capita income (yoy log change), lag 4",+,0.1159,0.0679,1.7083,0.0983
+h_l1,"Housing per resident, last published year (yoy log change), lag 1",+,-0.1136,0.2463,-0.4611,0.6481

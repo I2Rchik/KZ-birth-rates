@@ -4,14 +4,16 @@ Every file here is an untouched download from Taldau, the statistical database o
 
 Only the file names were changed when the files were registered. Taldau names every download `data.csv` or `download.xls`. The `.csv.gz` files are gzip-compressed, tab-separated tables, which is exactly how Taldau serves them.
 
-All files were retrieved on 18 October 2026. Each Taldau page has its own address; paste it into the "Page URL" lines below.
+All files were retrieved on 18 October 2026. Two files come from Taldau's English interface, with region names transliterated from Kazakh (SHYGYS = East, SOLTUSTIK = North, BATYS = West); `src/regions.py` maps them. Each Taldau page has its own address; paste it into the "Page URL" lines below.
 
 | File | Indicator in Taldau | Breakdown used | Frequency | Coverage |
 | --- | --- | --- | --- | --- |
 | births_quarterly_cumulative.csv.gz | Число родившихся (живыми), человек | regions, "Всего" | Cumulative January–quarter end | 2014Q1–2026Q2 (January–June 2022 absent in the source) |
 | population_monthly.csv.gz | Численность населения на начало периода, человек | regions, "Всего" | Start of month | January 2011 – January 2024 |
-| marriages_annual.csv.gz | Число зарегистрированных браков, человек (КСП 612401) | regions, "Всего" | Annual | 2000–2025 |
-| income_per_capita_annual.csv.gz | Среднедушевые номинальные денежные доходы населения, тенге | regions | Annual | 2000–2025 |
+| marriages_quarterly_cumulative.csv.gz | Number of registered marriages (Число зарегистрированных браков), English export | regions, "Total" | Cumulative January–quarter end | 2014Q1–2026Q2 (January–June 2022 absent) |
+| income_per_capita_quarterly.csv.gz | Average per capita nominal monetary income of the population, tenge, English export | regions | Quarterly | 2010Q1–2026Q2 |
+| marriages_annual.csv.gz | Число зарегистрированных браков, человек (КСП 612401) | regions, "Всего" | Annual | 2000–2025 (fallback only; not used while the quarterly file is present) |
+| income_per_capita_annual.csv.gz | Среднедушевые номинальные денежные доходы населения, тенге | regions | Annual | 2000–2025 (fallback only) |
 | housing_per_resident_annual.csv.gz | Обеспеченность жильем на одного проживающего, м² | regions, "Всего" | Annual | 2001–2025 |
 | cpi_quarterly_by_region.xls | Индекс потребительских цен, товары и услуги (ГНКИПЦ01_2753), отчетный период к предыдущему периоду | regions | Quarterly | 2011Q1–2026Q3 |
 
@@ -24,7 +26,8 @@ All files were retrieved on 18 October 2026. Each Taldau page has its own addres
 
 ## Downloaded but not used
 
-- National employment, monthly (data.csv_4): no regional breakdown.
+- National employment, monthly (data.csv_4) and quarterly (second batch, data.csv): no regional breakdown.
+- Per-capita income, monthly (second batch, data.csv_1): national total only.
 - Duplicate downloads: data.csv_6 is identical to data.csv_5, and download_1.xls is identical to download.xls.
 - Marriages in the old binary .xls format (2026.10.18-17.10.39.xls): the same annual figures as marriages_annual.csv.gz.
 
@@ -32,7 +35,9 @@ All files were retrieved on 18 October 2026. Each Taldau page has its own addres
 
 - births:
 - population:
-- marriages:
-- income:
+- marriages (quarterly):
+- marriages (annual):
+- income (quarterly):
+- income (annual):
 - housing_pc:
 - cpi:

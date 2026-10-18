@@ -23,7 +23,7 @@
       "navigation": "Taldau: indicator search; downloaded as data.csv_2 (gzip)"
     },
     {
-      "series": "marriages",
+      "series": "marriages_annual",
       "file": "marriages_annual.csv.gz",
       "sha256": "35e2d6ab42bf38ddb4bd427cdf8d199b7494df93069cd9fe3cd51cc060404662",
       "publisher": "Bureau of National Statistics of the Republic of Kazakhstan",
@@ -34,7 +34,7 @@
       "navigation": "Taldau: indicator search; downloaded as data.csv_1 (gzip)"
     },
     {
-      "series": "income",
+      "series": "income_annual",
       "file": "income_per_capita_annual.csv.gz",
       "sha256": "a8fa6c343c8d90f4bb6a27c2ad8215b4f8efc25b21c19138f3cedda06b3585d0",
       "publisher": "Bureau of National Statistics of the Republic of Kazakhstan",
@@ -65,6 +65,28 @@
       "retrieved": "2026-10-18",
       "revised": "yes: operational monthly data are revised when annual data are final",
       "navigation": "Taldau: indicator search; downloaded as download.xls (HTML table)"
+    },
+    {
+      "series": "marriages",
+      "file": "marriages_quarterly_cumulative.csv.gz",
+      "sha256": "f406984251ee43da8f0a9b4f2cd38035cfabb34daeb3d5963373b40c1a860764",
+      "publisher": "Bureau of National Statistics of the Republic of Kazakhstan",
+      "url": "https://taldau.stat.gov.kz",
+      "identifier": "Number of registered marriages (Число зарегистрированных браков), persons; Total; January–quarter end, cumulative (English export)",
+      "retrieved": "2026-10-18",
+      "revised": "yes: operational monthly data are revised when annual data are final",
+      "navigation": "Taldau, English interface; downloaded as data.csv_3 (gzip)"
+    },
+    {
+      "series": "income",
+      "file": "income_per_capita_quarterly.csv.gz",
+      "sha256": "2115ee86d9bdf2c59aa56aa7beef5382a96850ce08162fe58664a35c37b9c07c",
+      "publisher": "Bureau of National Statistics of the Republic of Kazakhstan",
+      "url": "https://taldau.stat.gov.kz",
+      "identifier": "Average per capita nominal monetary income of the population (Среднедушевые номинальные денежные доходы), tenge; quarterly (English export)",
+      "retrieved": "2026-10-18",
+      "revised": "yes: operational monthly data are revised when annual data are final",
+      "navigation": "Taldau, English interface; downloaded as data.csv_2 (gzip)"
     }
   ]
 }

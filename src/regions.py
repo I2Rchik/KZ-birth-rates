@@ -31,6 +31,8 @@ REGIONS = {
 # "west kazakhstan" before the national total "kazakhstan").
 _PATTERNS = [
     ("акмолин", "AKM"), ("akmola", "AKM"), ("ақмола", "AKM"),
+    ("shygys kazakhstan", "EKO"), ("soltustik kazakhstan", "NKO"), ("batys-kazakhstan", "WKO"),
+    ("batys kazakhstan", "WKO"), ("karagandy", "KAR"), ("turkistan", "TUR"),
     ("актюбин", "AKT"), ("актобе", "AKT"), ("aktobe", "AKT"), ("ақтөбе", "AKT"),
     ("жетісу", "ALM"), ("жетысу", "ALM"), ("жетису", "ALM"), ("zhetisu", "ALM"), ("zhetysu", "ALM"),
     ("алматинск", "ALM"), ("almaty region", "ALM"), ("almaty oblast", "ALM"), ("алматы облысы", "ALM"),
@@ -42,7 +44,7 @@ _PATTERNS = [
     ("костанай", "KOS"), ("kostanay", "KOS"), ("қостанай", "KOS"),
     ("кызылорд", "KZY"), ("kyzylorda", "KZY"), ("қызылорда", "KZY"),
     ("мангист", "MAN"), ("мангыстау", "MAN"), ("mangystau", "MAN"), ("mangistau", "MAN"), ("маңғыстау", "MAN"),
-    ("южно-казахстан", "TUR"), ("южно казахстан", "TUR"), ("south kazakhstan", "TUR"),
+    ("south-kazakhstan", "TUR"), ("южно-казахстан", "TUR"), ("южно казахстан", "TUR"), ("south kazakhstan", "TUR"),
     ("туркестан", "TUR"), ("turkestan", "TUR"), ("түркістан", "TUR"),
     ("шымкент", "TUR"), ("shymkent", "TUR"),
     ("павлодар", "PAV"), ("pavlodar", "PAV"),
@@ -65,6 +67,7 @@ def normalise(name):
 _SPLIT_COMPONENT = {
     # South Kazakhstan = Turkestan + Shymkent on the pre-2018 borders: a full unit
     "южно-казахстан": "SKO_FULL", "южно казахстан": "SKO_FULL", "south kazakhstan": "SKO_FULL",
+    "south-kazakhstan": "SKO_FULL",
     "жетісу": "ZHETISU", "жетысу": "ZHETISU", "жетису": "ZHETISU", "zhetisu": "ZHETISU", "zhetysu": "ZHETISU",
     "улытау": "ULYTAU", "ulytau": "ULYTAU", "ұлытау": "ULYTAU",
     "шымкент": "SHYMKENT", "shymkent": "SHYMKENT",
@@ -96,7 +99,7 @@ def is_top_level(name):
     Г.А.АЛАТАУ) and the national total. Taldau lists all of these together,
     and keeping a town would count its people twice."""
     s = normalise(name)
-    if not s or "район" in s or "г.а." in s or s.endswith(" г.а") or is_total(s):
+    if not s or "район" in s or "district" in s or "ауданы" in s or "г.а." in s or s.endswith(" г.а") or is_total(s):
         return False
     if region_code(s)[0] is None:
         return False

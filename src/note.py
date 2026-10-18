@@ -205,7 +205,7 @@ def build(model_dir=None, outputs=None, processed=None):
              "<li>a scenario slider whose 90% band comes from the artifact's covariance matrix, with a decision signal;</li>"
              "<li>a provenance panel and an honesty panel.</li></ul>"
              "<p><b>Error states:</b> no network shows a labelled cached snapshot; a missing or renamed artifact, missing processed data, or a missing input for a region each give a plain-language message; an edited raw file stops the build. "
-             "All 10 acceptance checks pass, and 4, 5, 8, 9 and 10 are automated in <code>tests/</code>. A static snapshot is published at i2rchik.github.io/KZ-birth-rates. "
+             "On a fresh clone from GitHub (18 October 2026), acceptance checks 2–10 pass: page in 0.12 s, contributions match the artifact, offline and missing-model messages shown. Checks 4, 5, 8, 9 and 10 are also automated in <code>tests/</code>. Check 1 (a clean install on another machine) is left to the Week 6 peer session. A static snapshot is published at i2rchik.github.io/KZ-birth-rates. "
              "<b>Next, with two more weeks:</b> published 2024–26 population, monthly marriages, quarterly unemployment by region, and an age-standardised fertility measure.</p>")
 
     # 6. Decision rule

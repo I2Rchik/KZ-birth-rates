@@ -250,3 +250,28 @@ class Repository(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class RealDataCrossCheck(unittest.TestCase):
+    """Re-estimates the committed model a second, independent way: least squares
+    with an explicit dummy for every region (LSDV) instead of the within
+    transformation. The coefficients must be identical (Frisch-Waugh-Lovell)."""
+
+    def test_lsdv_matches_artifact(self):
+        art_path = os.path.join(ROOT, "model", "artifact.json")
+        pan_path = os.path.join(ROOT, "data", "processed", "panel.csv")
+        if not (os.path.exists(art_path) and os.path.exists(pan_path)):
+            self.skipTest("no committed model/data")
+        a = json.load(open(art_path, encoding="utf-8"))
+        if a.get("synthetic_data"):
+            self.skipTest("synthetic data")
+        cfg = json.load(open(os.path.join(ROOT, "src", "config.json")))["model"]
+        panel = pd.read_csv(pan_path)
+        drivers = [d for d in cfg["drivers"] if d["name"] in panel and panel[d["name"]].notna().any()]
+        spec = {"dep": "y", "level": "cbr", "own_lags": cfg["own_lags"], "drivers": drivers}
+        d, names = model.design(model.add_lags(panel, spec), spec)
+        dummies = pd.get_dummies(d["code"]).to_numpy(float)
+        X = np.column_stack([d[names].to_numpy(float), dummies])
+        beta, *_ = np.linalg.lstsq(X, d["y"].to_numpy(float), rcond=None)
+        for j, n in enumerate(names):
+            self.assertAlmostEqual(beta[j], a["coefficients"][n], places=8, msg=n)

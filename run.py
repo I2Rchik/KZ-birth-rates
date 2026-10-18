@@ -5,6 +5,7 @@
   python run.py check           rebuild, then verify the headline numbers reproduce within tolerance
   python run.py test            run the automated tests
   python run.py ingest | model  run one layer only
+  python run.py note [--pdf]   write the technical note from the artifact (outputs/technical_note.html)
   python run.py export-site     write site/: a static snapshot for GitHub Pages
   python run.py register-raw FILE --series births --url URL --id SERIES_ID [--publisher NAME]
                                 copy a downloaded file into data/raw and record it in the manifest
@@ -49,9 +50,11 @@ def cmd_ingest(args):
 
 def cmd_model(args):
     import model
+    import note
     import report
     a = model.run()
     report.write()
+    note.build()
     b = a["benchmark"]
     print(f"model/artifact.json written. Hold-out RMSE model {b['rmse_model']:.3f} vs benchmark "
           f"{b['rmse_benchmark']:.3f} (ratio {b['rmse_ratio']:.3f}): {b['winner']} wins.")
@@ -111,6 +114,15 @@ def cmd_export_site(args):
     print("site/ written: open site/index.html through any static web server, or publish it with GitHub Pages.")
 
 
+def cmd_note(args):
+    import note
+    path = note.build()
+    print(f"note written: {os.path.relpath(path, ROOT)}")
+    if args.pdf:
+        note.to_pdf(path, path.replace(".html", ".pdf"))
+        print("PDF written: outputs/technical_note.pdf")
+
+
 def cmd_test(args):
     import unittest
     suite = unittest.defaultTestLoader.discover(os.path.join(ROOT, "tests"), top_level_dir=ROOT)
@@ -148,10 +160,11 @@ def cmd_register(args):
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("command", nargs="?", default="serve",
-                    choices=["serve", "ingest", "model", "rebuild", "check", "test", "register-raw", "export-site"])
+                    choices=["serve", "ingest", "model", "rebuild", "check", "test", "register-raw", "export-site", "note"])
     ap.add_argument("file", nargs="?")
     ap.add_argument("--port", type=int, default=int(os.environ.get("PORT", "8050")))
     ap.add_argument("--no-browser", action="store_true")
+    ap.add_argument("--pdf", action="store_true", help="note: also print to PDF (needs Playwright)")
     ap.add_argument("--series")
     ap.add_argument("--url", default="")
     ap.add_argument("--id", default="")
@@ -164,7 +177,7 @@ def main():
         ap.error("register-raw needs FILE and --series")
     {"serve": cmd_serve, "ingest": cmd_ingest, "model": cmd_model, "rebuild": cmd_rebuild,
      "check": cmd_check, "test": cmd_test, "register-raw": cmd_register,
-     "export-site": cmd_export_site}[args.command](args)
+     "export-site": cmd_export_site, "note": cmd_note}[args.command](args)
 
 
 if __name__ == "__main__":

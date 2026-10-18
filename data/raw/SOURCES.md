@@ -1,80 +1,38 @@
 # Sources
 
-Every file in this folder is an untouched download. `manifest.json` records each file's SHA-256 checksum, and `python run.py ingest` refuses to run if a file has changed. Fill one block per file when you register it. Leave nothing blank: the series identifier and the navigation path are what make the data traceable.
+Every file here is an untouched download from Taldau, the statistical database of the Bureau of National Statistics, Agency for Strategic Planning and Reforms of the Republic of Kazakhstan (https://taldau.stat.gov.kz/ru). `manifest.json` holds each file's SHA-256 checksum, and `python run.py ingest` refuses to run if a file changes.
 
-Publisher for all series: Bureau of National Statistics, Agency for Strategic Planning and Reforms of the Republic of Kazakhstan. Statistical database "Taldau": https://taldau.stat.gov.kz
+Only the file names were changed when the files were registered. Taldau names every download `data.csv` or `download.xls`. The `.csv.gz` files are gzip-compressed, tab-separated tables, which is exactly how Taldau serves them.
 
-Required for the model: births, marriages, population. The pre-registered drivers also need wage, cpi, unemployment and housing. If one of these is missing, `model.py` drops that driver and lists the drop as a deviation.
+All files were retrieved on 18 October 2026. Each Taldau page has its own address; paste it into the "Page URL" lines below.
 
-| Series key | What to download | Breakdown | Frequency | Years |
+| File | Indicator in Taldau | Breakdown used | Frequency | Coverage |
 | --- | --- | --- | --- | --- |
-| births | Number of live births (Число родившихся) | all regions, incl. Abai, Zhetisu, Ulytau, Shymkent | monthly | 2010 – latest |
-| marriages | Number of registered marriages (Число зарегистрированных браков) | all regions | monthly | 2010 – latest |
-| population | Population at the start of the month, or at 1 January (Численность населения) | all regions | monthly or annual | 2010 – latest |
-| wage | Average nominal monthly wage (Среднемесячная номинальная заработная плата) | all regions | quarterly | 2010 – latest |
-| cpi | Consumer price index, previous month = 100 (ИПЦ к предыдущему месяцу) | all regions | monthly | 2010 – latest |
-| unemployment | Unemployment rate (Уровень безработицы) | all regions | quarterly | 2010 – latest |
-| housing | Residential floor space commissioned, m² (Ввод в эксплуатацию жилых зданий) | all regions | monthly | 2010 – latest |
+| births_quarterly_cumulative.csv.gz | Число родившихся (живыми), человек | regions, "Всего" | Cumulative January–quarter end | 2014Q1–2026Q2 (January–June 2022 absent in the source) |
+| population_monthly.csv.gz | Численность населения на начало периода, человек | regions, "Всего" | Start of month | January 2011 – January 2024 |
+| marriages_annual.csv.gz | Число зарегистрированных браков, человек (КСП 612401) | regions, "Всего" | Annual | 2000–2025 |
+| income_per_capita_annual.csv.gz | Среднедушевые номинальные денежные доходы населения, тенге | regions | Annual | 2000–2025 |
+| housing_per_resident_annual.csv.gz | Обеспеченность жильем на одного проживающего, м² | regions, "Всего" | Annual | 2001–2025 |
+| cpi_quarterly_by_region.xls | Индекс потребительских цен, товары и услуги (ГНКИПЦ01_2753), отчетный период к предыдущему периоду | regions | Quarterly | 2011Q1–2026Q3 |
 
-If the CPI you download uses another base (for example, the same month last year = 100), set `"base"` in `src/config.json` and record that here.
+## Rules applied in code (src/ingest.py, src/regions.py)
 
----
+- **Regions only.** Taldau files also list districts (…РАЙОН), towns (Г.АКТОБЕ, АКСУ Г.А.), villages (С.АБАЙ), Alatau city administration (Г.А.АЛАТАУ) and the national total. All of these are dropped. Check: in every quarter, the 16 harmonised regions add up exactly to the national births total.
+- **South Kazakhstan before 2018.** The population file lists Shymkent both inside South Kazakhstan and as a town, 2017–May 2018. Where the old-border region exists for a period, only it is used.
+- **2022 regions.** Abai, Zhetisu and Ulytau are added to East Kazakhstan, Almaty oblast and Karaganda from the first period each is reported.
+- **Population projection.** After January 2024, population is projected at each region's average monthly growth from January 2023 to January 2024. Every quarter that uses a projection is flagged.
 
-## births
+## Downloaded but not used
 
-- File: `births_monthly.xlsx`
-- URL / API query:
-- Series identifier:
-- Navigation path:
-- Retrieval date:
-- Revised? Yes. Monthly operational data are replaced by final annual data.
+- National employment, monthly (data.csv_4): no regional breakdown.
+- Duplicate downloads: data.csv_6 is identical to data.csv_5, and download_1.xls is identical to download.xls.
+- Marriages in the old binary .xls format (2026.10.18-17.10.39.xls): the same annual figures as marriages_annual.csv.gz.
 
-## marriages
+## Page URLs (fill in)
 
-- File:
-- URL / API query:
-- Series identifier:
-- Navigation path:
-- Retrieval date:
-
-## population
-
-- File:
-- URL / API query:
-- Series identifier:
-- Navigation path:
-- Retrieval date:
-- Timing: start of month / 1 January (delete one)
-
-## wage
-
-- File:
-- URL / API query:
-- Series identifier:
-- Navigation path:
-- Retrieval date:
-
-## cpi
-
-- File:
-- Base: previous month = 100
-- URL / API query:
-- Series identifier:
-- Navigation path:
-- Retrieval date:
-
-## unemployment
-
-- File:
-- URL / API query:
-- Series identifier:
-- Navigation path:
-- Retrieval date:
-
-## housing
-
-- File:
-- URL / API query:
-- Series identifier:
-- Navigation path:
-- Retrieval date:
+- births:
+- population:
+- marriages:
+- income:
+- housing_pc:
+- cpi:

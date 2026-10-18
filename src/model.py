@@ -118,6 +118,10 @@ def integration_tests(p, rng):
     for name, s in series.items():
         if s is None or s.isna().all():
             continue
+        if s.groupby(p.code).nunique().median() < 20:
+            summary[name] = {"verdict": "not tested: annual series repeated over 4 quarters "
+                                        "(about 10 values per region, too few for ADF/KPSS)"}
+            continue
         adf_p, kpss_p = [], []
         for code in sorted(REGIONS):
             z = s[p.code == code].to_numpy(float)
@@ -210,7 +214,8 @@ def latest_values(p, level):
         out[code] = {"quarter": qlabel(t), "value": float(g[level][t]),
                      "same_quarter_last_year": None if prev != prev else float(prev),
                      "change": None if prev != prev else float(g[level][t] - prev),
-                     "population": float(g["population"][t]), "births": float(g["births"][t])}
+                     "population": float(g["population"][t]), "births": float(g["births"][t]),
+                     "population_projected": bool(g["pop_extrapolated"][t]) if "pop_extrapolated" in g else False}
     return out
 
 
@@ -252,7 +257,7 @@ def run(processed=None, model_dir=None, outputs=None, make_figures=True):
     panel = pd.read_csv(os.path.join(processed, "panel.csv"))
     rng = np.random.default_rng(cfg["seed"])
 
-    deviations = []
+    deviations = list(cfg.get("deviations", []))
     drivers = []
     for d in cfg["drivers"]:
         if d["name"] in panel and panel[d["name"]].notna().sum() > 0:
@@ -291,6 +296,7 @@ def run(processed=None, model_dir=None, outputs=None, make_figures=True):
     # ---- out of sample + robustness (all pre-declared)
     oos = out_of_sample(p, spec, cfg["holdout_share"])
     rob = []
+    mkey = next((f"{d_['name']}_l{d_['lag']}" for d_ in drivers if d_["name"] == "m"), None)
     cov_w = (qindex(cfg["covid_window"][0]), qindex(cfg["covid_window"][1]))
     variants = [
         ("Main specification", spec, None, p),
@@ -303,15 +309,14 @@ def run(processed=None, model_dir=None, outputs=None, make_figures=True):
         dd, nn = design(pp, sp, exclude=excl)
         r = fit(dd, nn, sp["dep"])
         o = out_of_sample(pp, sp, cfg["holdout_share"], exclude=excl)
-        mname = "m_l3"
-        j = nn.index(mname) if mname in nn else None
+        j = nn.index(mkey) if mkey in nn else None
         rob.append({"check": label, "n_obs": r["n"],
                     "marriage_coef": None if j is None else float(r["beta"][j]),
                     "marriage_p": None if j is None else float(r["p"][j]),
                     "rmse_ratio": o["rmse_ratio"], "winner": o["winner"]})
 
     # ---- pre-registered falsification
-    jm = names.index("m_l3") if "m_l3" in names else None
+    jm = names.index(mkey) if mkey in names else None
     falsification = {
         "rule_1_beats_benchmark": {"rmse_ratio": oos["rmse_ratio"], "passed": oos["rmse_ratio"] < 1},
         "rule_2_marriage_positive_5pct": None if jm is None else {
@@ -345,6 +350,7 @@ def run(processed=None, model_dir=None, outputs=None, make_figures=True):
         "estimated_at": dt.datetime.now(dt.timezone.utc).isoformat(timespec="seconds"),
         "synthetic_data": bool(meta.get("synthetic")),
         "data_warnings": meta.get("warnings", []),
+        "population_projected_from": meta.get("population_projected_from"),
         "sources": meta["sources"],
         "regions": REGIONS,
         "specification": {

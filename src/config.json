@@ -1,25 +1,46 @@
 {
   "series": {
-    "births":       {"type": "count", "required": true,  "label": "Live births"},
-    "marriages":    {"type": "count", "required": true,  "label": "Registered marriages"},
-    "population":   {"type": "stock", "required": true,  "label": "Population at start of period"},
-    "wage":         {"type": "rate",  "required": false, "label": "Average nominal monthly wage, tenge"},
-    "cpi":          {"type": "index", "required": false, "base": "previous_period", "label": "Consumer price index"},
-    "unemployment": {"type": "rate",  "required": false, "label": "Unemployment rate, %"},
-    "housing":      {"type": "count", "required": false, "label": "Residential floor space commissioned, m2"}
+    "births":       {"type": "count", "required": true,  "label": "Live births (Taldau: Число родившихся (живыми)), quarterly cumulative"},
+    "population":   {"type": "stock", "required": true,  "label": "Population at start of month (Численность населения на начало периода)",
+                     "extrapolate_window_months": 12},
+    "marriages":    {"type": "count", "required": true,  "label": "Registered marriages (Число зарегистрированных браков), annual"},
+    "income":       {"type": "rate",  "required": false, "label": "Per-capita nominal money income, tenge (Среднедушевые номинальные денежные доходы), annual"},
+    "housing_pc":   {"type": "rate",  "required": false, "label": "Housing per resident, m2 (Обеспеченность жильем на одного проживающего), annual"},
+    "cpi":          {"type": "index", "required": false, "label": "CPI, previous quarter = 100 (Индекс потребительских цен)"},
+    "unemployment": {"type": "rate",  "required": false, "label": "Unemployment rate, %, quarterly"}
   },
   "model": {
     "seed": 20261018,
     "holdout_share": 0.2,
     "drivers": [
-      {"name": "m", "lag": 3, "label": "Marriage rate (yoy log change)", "expected_sign": "+"},
-      {"name": "w", "lag": 4, "label": "Real wage (yoy log change)", "expected_sign": "+"},
+      {"name": "m", "lag": 1, "label": "Marriage rate, last published year (yoy log change)", "expected_sign": "+"},
+      {"name": "w", "lag": 1, "label": "Real per-capita income, last published year (yoy log change)", "expected_sign": "+"},
       {"name": "u", "lag": 4, "label": "Unemployment rate (yoy change, pp)", "expected_sign": "-"},
-      {"name": "h", "lag": 4, "label": "Housing commissioned per 1,000 (yoy log change)", "expected_sign": "+"}
+      {"name": "h", "lag": 1, "label": "Housing per resident, last published year (yoy log change)", "expected_sign": "+"}
     ],
     "own_lags": [1, 4],
-    "breaks": ["2015Q3", "2020Q2", "2022Q3"],
+    "breaks": ["2018Q2", "2020Q2", "2022Q3"],
     "covid_window": ["2020Q2", "2021Q4"],
-    "replication_tolerance_per_1000": 0.01
+    "replication_tolerance_per_1000": 0.01,
+    "deviations": [
+      {"what": "Sample starts 2014Q1, estimation from 2016Q1 (pre-registered: 2010Q1)",
+       "why": "Taldau publishes quarterly births by region only from January-March 2014",
+       "pre_registered_result": "not estimable: no quarterly regional births before 2014"},
+      {"what": "Marriage rate enters as the last published annual year-on-year change (lag 1 quarter after publication) instead of the quarterly change lagged 3 quarters",
+       "why": "Taldau gives registered marriages by region only annually",
+       "pre_registered_result": "not estimable with annual data"},
+      {"what": "Real wage replaced by real per-capita money income (annual, deflated by the regional CPI annual average)",
+       "why": "no quarterly regional wage series was downloaded; per-capita income is the closest regional income measure obtained",
+       "pre_registered_result": "not estimated"},
+      {"what": "Housing commissioned replaced by housing per resident (m2, annual)",
+       "why": "the housing-commissioned series was not obtained; the housing-stock series measures the same space constraint, more slowly",
+       "pre_registered_result": "not estimated"},
+      {"what": "Population after January 2024 projected at each region's growth over the previous 12 months",
+       "why": "the downloaded population file ends at 1 January 2024",
+       "pre_registered_result": "the pre-registration assumed published population for every quarter"},
+      {"what": "Chow break dates 2018Q2 / 2020Q2 / 2022Q3 instead of 2015Q3 / 2020Q2 / 2022Q3",
+       "why": "2015Q3 falls before the first estimation quarter (2016Q1); 2018Q2 is the South Kazakhstan / Shymkent split",
+       "pre_registered_result": "2015Q3 not testable inside the sample"}
+    ]
   }
 }

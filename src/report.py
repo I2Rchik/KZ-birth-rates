@@ -48,7 +48,11 @@ def write(model_dir=None, outputs=None):
              f"Rule 2 (marriage > 0 at 5%, one-sided): {'n/a' if not f2 else ('passed' if f2['passed'] else 'FAILED')}.\n")
     L.append("**Integration.**")
     for s, v in a["integration"].items():
-        L.append(f"- {s}: Fisher-ADF p = {_f(v['fisher_adf_p'])}, KPSS rejects in {100 * v['share_kpss_reject_5pct']:.0f}% of regions -> {v['verdict']}.")
+        if "fisher_adf_p" not in v:
+            L.append(f"- {s}: {v['verdict']}.")
+            continue
+        L.append(f"- {s}: Fisher-ADF p = {_f(v['fisher_adf_p'])}, ADF rejects in {100 * v['share_adf_reject_5pct']:.0f}% "
+                 f"and KPSS rejects in {100 * v['share_kpss_reject_5pct']:.0f}% of regions -> {v['verdict']}.")
     cf = a["cointegration"]["fisher"]
     if cf:
         L.append(f"- Engle-Granger (ln CBR on ln marriage rate), Fisher p = {_f(cf['pvalue'])}. Not needed for validity: no levels regression is run.\n")

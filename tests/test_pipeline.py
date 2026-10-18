@@ -54,29 +54,43 @@ class Transforms(unittest.TestCase):
     def test_quarterly_sum_needs_three_months(self):
         df = pd.DataFrame({"code": "AKM", "component": "AKM", "kind": "M", "year": 2020,
                            "idx": [1, 2, 3, 4, 5], "value": [1.0, 2.0, 3.0, 4.0, 5.0]})
-        q = ingest.to_quarterly(df, "sum").set_index("quarter")["value"]
-        self.assertEqual(q["2020Q1"], 6.0)
-        self.assertTrue(np.isnan(q["2020Q2"]))  # only two months: not a full quarter
+        q = ingest.to_quarterly(df, "sum").set_index("idx")["value"]
+        self.assertEqual(q[1], 6.0)
+        self.assertTrue(np.isnan(q[2]))  # only two months: not a full quarter
 
     def test_cumulative_to_quarter(self):
         df = pd.DataFrame({"code": "AKM", "component": "AKM", "kind": "CUM", "year": 2025,
                            "idx": [3, 6], "value": [100.0, 230.0]})
-        q = ingest.to_quarterly(ingest.cumulative_to_monthly(df), "sum").set_index("quarter")["value"]
-        self.assertEqual(q["2025Q1"], 100.0)
-        self.assertEqual(q["2025Q2"], 130.0)
+        q = ingest.to_quarterly(ingest.cumulative_to_period(df), "sum").set_index("idx")["value"]
+        self.assertEqual(q[1], 100.0)
+        self.assertEqual(q[2], 130.0)
 
     def test_chain_index(self):
-        df = pd.DataFrame({"code": "AKM", "component": "AKM", "kind": "M", "year": 2020,
-                           "idx": [1, 2, 3], "value": [101.0, 102.0, 100.0]})
-        out = ingest.chain_index(df, "previous_period")["value"].to_numpy()
+        df = pd.DataFrame({"code": "AKM", "t": [1, 2, 3], "value": [101.0, 102.0, 100.0]})
+        out = ingest.chain_index(df)["value"].to_numpy()
         np.testing.assert_allclose(out, [101.0, 103.02, 103.02])
 
     def test_harmonisation_sums_components_once_they_exist(self):
-        q = pd.DataFrame({"code": ["EKO"] * 4, "component": ["EKO", "EKO", "ABAI", "ABAI"],
-                          "quarter": ["2022Q2", "2022Q3", "2022Q2", "2022Q3"], "value": [10.0, 6.0, np.nan, 4.0]})
-        h = ingest.harmonise_sum(q).set_index("quarter")["value"]
-        self.assertEqual(h["2022Q2"], 10.0)  # Abai did not exist yet
-        self.assertEqual(h["2022Q3"], 10.0)  # 6 + 4
+        q = pd.DataFrame({"code": ["EKO"] * 4, "component": ["EKO", "EKO", "ABAI", "ABAI"], "kind": "Q",
+                          "year": 2022, "idx": [2, 3, 2, 3], "value": [10.0, 6.0, np.nan, 4.0]})
+        h = ingest.harmonise_counts(q).set_index("idx")["value"]
+        self.assertEqual(h[2], 10.0)  # Abai did not exist yet
+        self.assertEqual(h[3], 10.0)  # 6 + 4
+
+    def test_full_unit_rule_prevents_double_count(self):
+        """Before 2018 Taldau lists Shymkent as a town inside South Kazakhstan."""
+        q = pd.DataFrame({"code": "TUR", "component": ["SKO_FULL", "SHYMKENT", "TUR", "SHYMKENT"], "kind": "M",
+                          "year": [2017, 2017, 2019, 2019], "idx": 1, "value": [100.0, 30.0, 70.0, 32.0]})
+        h = ingest.harmonise_counts(q).set_index("year")["value"]
+        self.assertEqual(h[2017], 100.0)
+        self.assertEqual(h[2019], 102.0)
+
+    def test_top_level_filter(self):
+        from regions import is_top_level
+        for keep in ("АКМОЛИНСКАЯ ОБЛАСТЬ", "Г.АЛМАТЫ", "ОБЛАСТЬ АБАЙ", "ЮЖНО-КАЗАХСТАНСКАЯ ОБЛАСТЬ", "Г.ШЫМКЕНТ"):
+            self.assertTrue(is_top_level(keep), keep)
+        for drop in ("Г.АКТОБЕ", "АКСУ Г.А.", "АБАЙСКИЙ РАЙОН", "С.АБАЙ", "Г.А.АЛАТАУ", "РЕСПУБЛИКА КАЗАХСТАН"):
+            self.assertFalse(is_top_level(drop), drop)
 
     def test_ols_recovers_known_coefficients(self):
         rng = np.random.default_rng(1)
@@ -112,6 +126,13 @@ class Pipeline(unittest.TestCase):
     def tearDownClass(cls):
         shutil.rmtree(cls.tmp, ignore_errors=True)
 
+    def test_fixture_totals_are_not_double_counted(self):
+        """Towns, villages, districts and Alatau in the raw files must not enter the sum."""
+        p = self.panel.set_index(["code", "quarter"])
+        self.assertLess(abs(p.loc[("TUR", "2017Q1"), "population"] / p.loc[("TUR", "2019Q1"), "population"] - 1), 0.05)
+        self.assertLess(abs(p.loc[("EKO", "2022Q1"), "population"] / p.loc[("EKO", "2023Q1"), "population"] - 1), 0.05)
+        self.assertTrue(np.isnan(p.loc[("AKM", "2022Q2"), "births"]))  # Jan-Jun 2022 missing in the source
+
     def test_rebuild_is_byte_identical(self):
         other = os.path.join(self.tmp, "processed2")
         ingest.build(self.raw, other)
@@ -121,7 +142,7 @@ class Pipeline(unittest.TestCase):
     def test_edited_raw_file_is_refused(self):
         bad = os.path.join(self.tmp, "raw_edit")
         shutil.copytree(self.raw, bad)
-        with open(os.path.join(bad, "births_monthly.xlsx"), "ab") as f:
+        with open(os.path.join(bad, "births.csv.gz"), "ab") as f:
             f.write(b"x")
         with self.assertRaises(ingest.DataError):
             ingest.build(bad, os.path.join(self.tmp, "p_bad"))
@@ -130,7 +151,8 @@ class Pipeline(unittest.TestCase):
         """Changing anything dated t* or later must not change the forecast for t*,
         nor the coefficients estimated on data up to t*-1."""
         cfg = json.load(open(os.path.join(ROOT, "src", "config.json")))["model"]
-        spec = {"dep": "y", "level": "cbr", "own_lags": cfg["own_lags"], "drivers": cfg["drivers"]}
+        drivers = [d for d in cfg["drivers"] if d["name"] in self.panel and self.panel[d["name"]].notna().any()]
+        spec = {"dep": "y", "level": "cbr", "own_lags": cfg["own_lags"], "drivers": drivers}
         p0 = model.add_lags(self.panel, spec)
         t_star = int(p0.t.max()) - 6
         d0, names = model.design(p0, spec, t_max=t_star - 1)
@@ -142,7 +164,8 @@ class Pipeline(unittest.TestCase):
         rng = np.random.default_rng(3)
         mask = future.t >= t_star
         for c in ("y", "m", "w", "u", "h", "cbr"):
-            future.loc[mask, c] = rng.normal(5, 3, mask.sum())
+            if c in future:
+                future.loc[mask, c] = rng.normal(5, 3, mask.sum())
         p1 = model.add_lags(future, spec)
         d1, _ = model.design(p1, spec, t_max=t_star - 1)
         r1 = model.fit(d1, names, "y")

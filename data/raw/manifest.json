@@ -1,0 +1,70 @@
+{
+  "files": [
+    {
+      "series": "births",
+      "file": "births_quarterly_cumulative.csv.gz",
+      "sha256": "29eee04974df8d781d32ee39fd27074112bec1744bf62711de69904187b68145",
+      "publisher": "Bureau of National Statistics of the Republic of Kazakhstan",
+      "url": "https://taldau.stat.gov.kz/ru",
+      "identifier": "Число родившихся (живыми), человек; Всего; январь–квартал нарастающим итогом",
+      "retrieved": "2026-10-18",
+      "revised": "yes: operational monthly data are revised when annual data are final",
+      "navigation": "Taldau: indicator search; downloaded as data.csv (gzip)"
+    },
+    {
+      "series": "population",
+      "file": "population_monthly.csv.gz",
+      "sha256": "709e649512f8a66f0bf0fc687ff0165d1469da3655da0038ea0ca608f3898b88",
+      "publisher": "Bureau of National Statistics of the Republic of Kazakhstan",
+      "url": "https://taldau.stat.gov.kz/ru",
+      "identifier": "Численность населения на начало периода, человек; Всего; месяц",
+      "retrieved": "2026-10-18",
+      "revised": "yes: operational monthly data are revised when annual data are final",
+      "navigation": "Taldau: indicator search; downloaded as data.csv_2 (gzip)"
+    },
+    {
+      "series": "marriages",
+      "file": "marriages_annual.csv.gz",
+      "sha256": "35e2d6ab42bf38ddb4bd427cdf8d199b7494df93069cd9fe3cd51cc060404662",
+      "publisher": "Bureau of National Statistics of the Republic of Kazakhstan",
+      "url": "https://taldau.stat.gov.kz/ru",
+      "identifier": "Число зарегистрированных браков, человек; Всего; год (КСП 612401)",
+      "retrieved": "2026-10-18",
+      "revised": "yes: operational monthly data are revised when annual data are final",
+      "navigation": "Taldau: indicator search; downloaded as data.csv_1 (gzip)"
+    },
+    {
+      "series": "income",
+      "file": "income_per_capita_annual.csv.gz",
+      "sha256": "a8fa6c343c8d90f4bb6a27c2ad8215b4f8efc25b21c19138f3cedda06b3585d0",
+      "publisher": "Bureau of National Statistics of the Republic of Kazakhstan",
+      "url": "https://taldau.stat.gov.kz/ru",
+      "identifier": "Среднедушевые номинальные денежные доходы населения, тенге; год",
+      "retrieved": "2026-10-18",
+      "revised": "yes: operational monthly data are revised when annual data are final",
+      "navigation": "Taldau: indicator search; downloaded as data.csv_3 (gzip)"
+    },
+    {
+      "series": "housing_pc",
+      "file": "housing_per_resident_annual.csv.gz",
+      "sha256": "660485fbd1d30eb2df1a2cba5300aa1a54b3daee589103333ba01fd2f2a61396",
+      "publisher": "Bureau of National Statistics of the Republic of Kazakhstan",
+      "url": "https://taldau.stat.gov.kz/ru",
+      "identifier": "Обеспеченность жильем на одного проживающего, м2; Всего; год",
+      "retrieved": "2026-10-18",
+      "revised": "yes: operational monthly data are revised when annual data are final",
+      "navigation": "Taldau: indicator search; downloaded as data.csv_5 (gzip)"
+    },
+    {
+      "series": "cpi",
+      "file": "cpi_quarterly_by_region.xls",
+      "sha256": "de4887cdfc9a116dbcfcf305a7aabfd47f0eac2f309b84c2a409b707f89d61b3",
+      "publisher": "Bureau of National Statistics of the Republic of Kazakhstan",
+      "url": "https://taldau.stat.gov.kz/ru",
+      "identifier": "Индекс потребительских цен, %, товары и услуги (ГНКИПЦ01_2753); отчетный период к предыдущему периоду; квартал",
+      "retrieved": "2026-10-18",
+      "revised": "yes: operational monthly data are revised when annual data are final",
+      "navigation": "Taldau: indicator search; downloaded as download.xls (HTML table)"
+    }
+  ]
+}

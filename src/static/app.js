@@ -60,6 +60,8 @@ function banners() {
   const synth = (S.model && S.model.synthetic_data) || (S.meta && S.meta.synthetic);
   if (synth) out.push(`<div class="banner test">TEST DATA: this run uses a synthetic fixture, not official statistics. No number on this page describes Kazakhstan.</div>`);
   for (const e of S.errors || []) out.push(`<div class="banner err">${esc(e.message)}</div>`);
+  const pp = S.meta && S.meta.population_projected_from;
+  if (pp) out.push(`<div class="banner warn">Population from ${esc(pp)} onward is projected (the published series ends earlier), so rates for those quarters carry extra uncertainty. Births themselves are published figures.</div>`);
   const w = (S.meta && S.meta.warnings) || [];
   if (w.length) out.push(`<div class="banner warn">Data check: ${w.map(esc).join(" ")}</div>`);
   $("banners").innerHTML = out.join("");
@@ -171,7 +173,7 @@ function chart(name, hist, fc, scen) {
     s += `<circle cx="${X(n - 1)}" cy="${Y(fc.value)}" r="5" fill="#fff" stroke="#1f5f8b" stroke-width="2"/>`;
   }
   const src = (S.meta && S.meta.sources || []).find((x) => x.series === "births") || {};
-  s += `<text x="${ml}" y="${H - 22}" font-size="11" fill="#5d6b7a">Source: ${esc(src.publisher || "Bureau of National Statistics")} (${esc(src.identifier || "series id not recorded")}), births and population, retrieved ${esc(src.retrieved || "n/a")}.</text>`;
+  s += `<text x="${ml}" y="${H - 22}" font-size="11" fill="#5d6b7a">Source: Bureau of National Statistics (stat.gov.kz, Taldau): live births and population by region, retrieved ${esc(src.retrieved || "n/a")}.</text>`;
   s += `<text x="${ml}" y="${H - 6}" font-size="11" fill="#5d6b7a">Shaded: 90% interval. Dark: parameter uncertainty from the model covariance matrix. Light: also includes residual variance.</text>`;
   s += `</svg>`;
   el.innerHTML = s;

@@ -1,0 +1,93 @@
+{
+  "first_quarter": "2014Q1",
+  "last_quarter": "2026Q2",
+  "population_projected_from": "2024Q1",
+  "regions": {
+    "AKM": "Akmola",
+    "AKT": "Aktobe",
+    "ALA": "Almaty city",
+    "ALM": "Almaty oblast (incl. Zhetisu)",
+    "AST": "Astana",
+    "ATY": "Atyrau",
+    "EKO": "East Kazakhstan (incl. Abai)",
+    "KAR": "Karaganda (incl. Ulytau)",
+    "KOS": "Kostanay",
+    "KZY": "Kyzylorda",
+    "MAN": "Mangystau",
+    "NKO": "North Kazakhstan",
+    "PAV": "Pavlodar",
+    "TUR": "Turkestan + Shymkent",
+    "WKO": "West Kazakhstan",
+    "ZHA": "Zhambyl"
+  },
+  "sources": [
+    {
+      "file": "births_quarterly_cumulative.csv.gz",
+      "identifier": "Число родившихся (живыми), человек; Всего; январь–квартал нарастающим итогом",
+      "publisher": "Bureau of National Statistics of the Republic of Kazakhstan",
+      "retrieved": "2026-10-18",
+      "revised": "yes: operational monthly data are revised when annual data are final",
+      "series": "births",
+      "synthetic": null,
+      "url": "https://taldau.stat.gov.kz/ru",
+      "used_as": null
+    },
+    {
+      "file": "population_monthly.csv.gz",
+      "identifier": "Численность населения на начало периода, человек; Всего; месяц",
+      "publisher": "Bureau of National Statistics of the Republic of Kazakhstan",
+      "retrieved": "2026-10-18",
+      "revised": "yes: operational monthly data are revised when annual data are final",
+      "series": "population",
+      "synthetic": null,
+      "url": "https://taldau.stat.gov.kz/ru",
+      "used_as": null
+    },
+    {
+      "file": "marriages_annual.csv.gz",
+      "identifier": "Число зарегистрированных браков, человек; Всего; год (КСП 612401)",
+      "publisher": "Bureau of National Statistics of the Republic of Kazakhstan",
+      "retrieved": "2026-10-18",
+      "revised": "yes: operational monthly data are revised when annual data are final",
+      "series": "marriages",
+      "synthetic": null,
+      "url": "https://taldau.stat.gov.kz/ru",
+      "used_as": null
+    },
+    {
+      "file": "income_per_capita_annual.csv.gz",
+      "identifier": "Среднедушевые номинальные денежные доходы населения, тенге; год",
+      "publisher": "Bureau of National Statistics of the Republic of Kazakhstan",
+      "retrieved": "2026-10-18",
+      "revised": "yes: operational monthly data are revised when annual data are final",
+      "series": "income",
+      "synthetic": null,
+      "url": "https://taldau.stat.gov.kz/ru",
+      "used_as": null
+    },
+    {
+      "file": "housing_per_resident_annual.csv.gz",
+      "identifier": "Обеспеченность жильем на одного проживающего, м2; Всего; год",
+      "publisher": "Bureau of National Statistics of the Republic of Kazakhstan",
+      "retrieved": "2026-10-18",
+      "revised": "yes: operational monthly data are revised when annual data are final",
+      "series": "housing_pc",
+      "synthetic": null,
+      "url": "https://taldau.stat.gov.kz/ru",
+      "used_as": null
+    },
+    {
+      "file": "cpi_quarterly_by_region.xls",
+      "identifier": "Индекс потребительских цен, %, товары и услуги (ГНКИПЦ01_2753); отчетный период к предыдущему периоду; квартал",
+      "publisher": "Bureau of National Statistics of the Republic of Kazakhstan",
+      "retrieved": "2026-10-18",
+      "revised": "yes: operational monthly data are revised when annual data are final",
+      "series": "cpi",
+      "synthetic": null,
+      "url": "https://taldau.stat.gov.kz/ru",
+      "used_as": null
+    }
+  ],
+  "synthetic": false,
+  "warnings": []
+}

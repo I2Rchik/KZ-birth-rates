@@ -1,0 +1,95 @@
+{
+ "diagnostics": {
+  "serial_correlation": {
+   "stat": 7.348817616109529,
+   "pvalue": 0.0005758035212815889,
+   "lags": [
+    1,
+    2,
+    3,
+    4
+   ],
+   "rho1": 0.08782215510981453
+  },
+  "heteroskedasticity_bp": {
+   "stat": 10.360352609793345,
+   "df": 5,
+   "pvalue": 0.06564542777556819
+  },
+  "normality_jb": {
+   "stat": 26.73861725516068,
+   "pvalue": 1.562366924035261e-06,
+   "skew": -0.3083408703922267,
+   "kurtosis": 3.8952770341228056
+  },
+  "vif": {
+   "y_l1": 1.2431091864026451,
+   "y_l4": 1.2582232044897639,
+   "m_l1": 1.1185872267507135,
+   "w_l1": 1.118117389161664,
+   "h_l1": 1.0507530823524127
+  },
+  "cross_sectional_dependence_cd": {
+   "stat": 28.241841931704613,
+   "pvalue": 1.7927084662343406e-175,
+   "mean_rho": 0.4432065811861162
+  },
+  "stability_chow": {
+   "2018Q2": {
+    "stat": 13.185881143762984,
+    "pvalue": 1.4556301353671378e-07
+   },
+   "2020Q2": {
+    "stat": 18.92974794914129,
+    "pvalue": 2.0766266794776208e-09
+   },
+   "2022Q3": {
+    "stat": 28.514455502510703,
+    "pvalue": 1.0211425441938766e-11
+   }
+  }
+ },
+ "flags": {
+  "serial_correlation": true,
+  "heteroskedasticity": false,
+  "non_normal_residuals": true,
+  "high_multicollinearity": false,
+  "cross_sectional_dependence": true,
+  "unstable_at": [
+   "2018Q2",
+   "2020Q2",
+   "2022Q3"
+  ]
+ },
+ "integration": {
+  "ln_cbr": {
+   "fisher_adf_p": 1.0,
+   "share_adf_reject_5pct": 0.0,
+   "share_kpss_reject_5pct": 0.875,
+   "verdict": "unit root (both tests agree)"
+  },
+  "y": {
+   "fisher_adf_p": 0.4060777911718964,
+   "share_adf_reject_5pct": 0.0,
+   "share_kpss_reject_5pct": 0.0,
+   "verdict": "inconclusive (tests disagree)"
+  },
+  "m": {
+   "verdict": "not tested: annual series repeated over 4 quarters (about 10 values per region, too few for ADF/KPSS)"
+  },
+  "w": {
+   "verdict": "not tested: annual series repeated over 4 quarters (about 10 values per region, too few for ADF/KPSS)"
+  },
+  "h": {
+   "verdict": "not tested: annual series repeated over 4 quarters (about 10 values per region, too few for ADF/KPSS)"
+  }
+ },
+ "cointegration": {
+  "test": "Engle-Granger, ln CBR on ln marriage rate, per region",
+  "fisher": {
+   "stat": 70.69757053645037,
+   "df": 32,
+   "pvalue": 9.632122287907717e-05
+  }
+ }
+}

@@ -1,0 +1,5 @@
+check,n_obs,marriage_coef,marriage_p,rmse_ratio,winner
+Main specification,543,0.0956,0.0771,0.8162,model
+Alt. sample: drop 2020Q2-2021Q4,431,0.0923,0.2166,0.8605,model
+Alt. specification: no lagged dependent variable,670,0.0148,0.8857,0.8981,model
+Alt. measure: births count instead of rate,543,0.1044,0.0561,1.0744,benchmark

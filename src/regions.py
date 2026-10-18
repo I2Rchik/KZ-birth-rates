@@ -63,6 +63,8 @@ def normalise(name):
 
 
 _SPLIT_COMPONENT = {
+    # South Kazakhstan = Turkestan + Shymkent on the pre-2018 borders: a full unit
+    "южно-казахстан": "SKO_FULL", "южно казахстан": "SKO_FULL", "south kazakhstan": "SKO_FULL",
     "жетісу": "ZHETISU", "жетысу": "ZHETISU", "жетису": "ZHETISU", "zhetisu": "ZHETISU", "zhetysu": "ZHETISU",
     "улытау": "ULYTAU", "ulytau": "ULYTAU", "ұлытау": "ULYTAU",
     "шымкент": "SHYMKENT", "shymkent": "SHYMKENT",
@@ -83,6 +85,25 @@ def region_code(name):
         if pat in s:
             return code, _SPLIT_COMPONENT.get(pat, code)
     return None, None
+
+
+_REPUBLICAN_CITIES = ("алматы", "астана", "шымкент", "нур-султан", "almaty", "astana", "shymkent", "nur-sultan")
+
+
+def is_top_level(name):
+    """True for an oblast or a city of republican significance; False for
+    districts (район), towns inside an oblast (Г.АКТОБЕ, АКСУ Г.А.,
+    Г.А.АЛАТАУ) and the national total. Taldau lists all of these together,
+    and keeping a town would count its people twice."""
+    s = normalise(name)
+    if not s or "район" in s or "г.а." in s or s.endswith(" г.а") or is_total(s):
+        return False
+    if region_code(s)[0] is None:
+        return False
+    # an oblast is always named as one; anything else must be a republican city
+    if any(w in s for w in ("област", "облысы", "oblast", "region")):
+        return True
+    return any(c in s for c in _REPUBLICAN_CITIES) and not s.startswith(("с.", "п.", "пос."))
 
 
 def is_total(name):
